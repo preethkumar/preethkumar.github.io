@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <script type="text/javascript" src="d3.min.js"></script>
+  <script type="text/javascript" src="crossfilter.js"></script>
+  <script type="text/javascript" src="dc.js"></script>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="dc.css" media="screen" /> 
+  </head>
+  <body>
+<div class="container" >
+<div class="jumbotron">
+    <h1>BI Dashboard</h1>
+    <p>Resize this responsive page to see the effect!</p> 
+  </div>
+	<div class="col-sm-12"><a href="javascript:dc.filterAll();dc.renderAll();">Filter All</a></div>
+
+    	<div class="col-sm-6" id="pie-chart"><h3>Product</h3></div>
+	<div class="col-sm-6" id="row-chart"><h3>Monthly Production</h3></div>
+	<div class="col-sm-12"id="row-chart2"><h3>Manager</h3></div>
+	
+<div class="col-sm-12">
+		<table class="table table-condensed table-bordered table-striped" id="dc-data-table">
+		<thead>
+			<tr class="header">
+				<th>Month</th>
+				<th>Product</th>
+				<th>Manager</th>
+			</tr>
+		</thead>
+		</table>
+</div> 
+   
+
+</div>
+<script>
+
+var data = crossfilter([{
+    name: "Jan",
+    type: "Prod1",
+    legs: 2,
+  manager:"john"
+}, {
+    name: "Feb",
+    type: "Prod1",
+    legs: 2,
+  manager:"john"
+}, {
+    name: "Mar",
+    type: "Prod2",
+    legs: 4,
+ manager:"paul"
+}, {
+    name: "Apr",
+    type: "Prod2",
+    legs: 4,
+ manager:"paul"
+}, {
+    name: "May",
+    type: "Prod3",
+    legs: 2,
+ manager:"michel"
+}, {
+    name: "Jun",
+    type: "Prod4",
+    legs: 1,
+ manager:"john"
+}]);
+
+var typeDimension = data.dimension(function (d) {
+    return d.type;
+});
+var countPerType = typeDimension.group();
+
+var typeDimension1 = data.dimension(function (d) {
+    return d.type;
+});
+var legsPerType = typeDimension1.group().reduceSum(function (d) {
+    return d.legs;
+});
+
+var nameDimension = data.dimension(function(d){
+return d.name;
+});
+
+var legsPerName = nameDimension.group().reduceSum(function(d){
+ return d.legs;
+});
+
+var managerDimension = data.dimension(function(d){
+return d.manager;
+});
+
+var managerPerName = managerDimension.group();
+
+dc.barChart('#bar-chart')
+    .centerBar(true)
+    .gap(100)
+    .x(d3.scale.ordinal())
+    .xUnits(dc.units.ordinal)
+    .width(600)
+    .height(200)
+    .dimension(typeDimension)
+    .group(legsPerType);
+
+dc.pieChart("#pie-chart")
+    .width(200)
+    .height(200)
+    .dimension(typeDimension)
+    .group(countPerType)
+    .innerRadius(30);
+
+dc.rowChart("#row-chart")
+    .width(600)
+    .height(200)
+    .dimension(nameDimension)
+    .group(legsPerName);
+    
+dc.rowChart("#row-chart2")
+    .width(600)
+    .height(200)
+    .dimension(managerDimension)
+    .group(managerPerName);
+
+
+var datatable = dc.dataTable("#dc-data-table");
+
+datatable
+    .dimension(nameDimension)
+    .group(function(d) {return " ";})
+    .columns([
+	function(d) {return d.name;},
+	function(d) {return d.type;},
+	function(d) {return d.manager;}
+
+
+
+
+]
+
+
+);    
+
+dc.renderAll();
+
+
+</script>
+
+  </body>
+</html>
